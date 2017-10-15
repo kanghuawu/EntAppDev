@@ -27,13 +27,10 @@ public class AuthorizationAspect implements Ordered {
      * @param joinPoint
      * @throws AccessDeniedExeption
      */
-    @Before("execution(public edu.sjsu.cmpe275.aop.Blog edu.sjsu.cmpe275.aop.BlogService.readBlog(..))")
-    public void checkReadBlog(JoinPoint joinPoint) throws AccessDeniedExeption {
-        final Object[] args = joinPoint.getArgs();
-        final String userId = (String) args[0];
-        final String blogUserId = (String) args[1];
+    @Before("execution(public edu.sjsu.cmpe275.aop.Blog edu.sjsu.cmpe275.aop.BlogService.readBlog(..)) && args(userId, blogUserId)")
+    public void checkReadBlog(JoinPoint joinPoint, String userId, String blogUserId) throws AccessDeniedExeption {
 
-        if (!equals(userId, blogUserId) && !hasBeenShared(blogUserId, userId)) {
+    	if (!equals(userId, blogUserId) && !hasBeenShared(blogUserId, userId)) {
             throw new AccessDeniedExeption("Error! " + userId + " cannot read " + blogUserId + "'s blog. ");
         }
     }
@@ -45,12 +42,8 @@ public class AuthorizationAspect implements Ordered {
      *
 	 * @param joinPoint
 	 */
-	@Before("execution(public void edu.sjsu.cmpe275.aop.BlogService.shareBlog(..))")
-	public void checkShareBlog(JoinPoint joinPoint) throws AccessDeniedExeption {
-        final Object[] args = joinPoint.getArgs();
-        final String userId = (String) args[0];
-        final String blogUserId = (String) args[1];
-        final String targetUserId = (String) args[2];
+	@Before("execution(public void edu.sjsu.cmpe275.aop.BlogService.shareBlog(..)) && args(userId, blogUserId, targetUserId)")
+	public void checkShareBlog(JoinPoint joinPoint, String userId, String blogUserId, String targetUserId) throws AccessDeniedExeption {
 
         if (equals(userId, blogUserId) || hasBeenShared(blogUserId, userId)) {
             share(blogUserId, targetUserId);
@@ -64,11 +57,8 @@ public class AuthorizationAspect implements Ordered {
      *
      * @param joinPoint
      */
-	@Before("execution(public void edu.sjsu.cmpe275.aop.BlogService.unshareBlog(..))")
-	public void checkUnshareBlog(JoinPoint joinPoint) throws AccessDeniedExeption {
-        final Object[] args = joinPoint.getArgs();
-        final String userId = (String) args[0];
-        final String targetUserId = (String) args[1];
+	@Before("execution(public void edu.sjsu.cmpe275.aop.BlogService.unshareBlog(..)) && args(userId, targetUserId) ")
+	public void checkUnshareBlog(JoinPoint joinPoint, String userId, String targetUserId) throws AccessDeniedExeption {
 
         if (equals(userId, targetUserId)) {
             // do nothing
